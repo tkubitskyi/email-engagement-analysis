@@ -44,6 +44,7 @@ The output is filtered to the top 10 countries by accounts **or** by sent emails
 2. Combined both metric groups with `UNION ALL` and aggregated them to one grain.
 3. Added country-level totals and rankings with window functions.
 4. Built engagement metrics in Looker Studio as **ratios of sums**: `SUM(open_msg) / SUM(sent_msg)` and `SUM(visit_msg) / SUM(sent_msg)`.
+5. Full query: [user_email_analysis.sql](user_email_analysis.sql)
 
 ## 📈 Key Insights
 
@@ -55,8 +56,8 @@ The output is filtered to the top 10 countries by accounts **or** by sent emails
 
 ## 📷 Dashboard
 
-<img width="871" height="652" alt="Знімок екрана 2026-10-15 173613" src="https://github.com/user-attachments/assets/41bc8a6d-4ada-48bf-a8f5-5c07ecec4e82" />
-<img width="872" height="658" alt="Знімок екрана 2026-10-15 173627" src="https://github.com/user-attachments/assets/2dbd9391-eb73-4aee-b13a-67fc5e712b65" />
+<img width="871" height="652" alt="Dashboard page 1" src="https://github.com/user-attachments/assets/41bc8a6d-4ada-48bf-a8f5-5c07ecec4e82" />
+<img width="872" height="658" alt="Dashboard page 2" src="https://github.com/user-attachments/assets/2dbd9391-eb73-4aee-b13a-67fc5e712b65" />
 
 - **Page 1 – Volume by Country:** accounts and sent emails by country, metrics table
 - **Page 2 – Engagement & Timeline:** open rate and click rate by country, daily email activity
