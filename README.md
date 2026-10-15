@@ -51,7 +51,7 @@ The output is filtered to the top 10 countries by accounts **or** by sent emails
 - **Email volume scales with the user base.** Country rankings by sent emails closely mirror rankings by accounts, at roughly 17–21 messages per account.
 - **Engagement differs more than volume.** Overall open rate is 35.5% and click rate 3.9%. China has the highest open rate (41.2%), while Spain and Singapore have the lowest (~29.5%).
 - **Singapore stands out:** the highest email volume per account (23.7) combined with the lowest click rate (2.6%). This may point to email fatigue. It is a hypothesis worth testing (for example, an A/B test on send frequency), not a proven cause.
-- **Activity over time:** weekly email volume rises through November 2020, plateaus from mid-December to late January, then drops. The ramp-up and drop likely reflect the boundaries of the data window rather than changes in user behavior.
+- **Activity over time:** email volume rises through November 2020, plateaus from mid-December to late January, then drops. The ramp-up and drop likely reflect the boundaries of the data window rather than changes in user behavior.
 
 ## 📷 Dashboard
 
