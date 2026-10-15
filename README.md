@@ -1,5 +1,3 @@
-<img width="872" height="658" alt="Знімок екрана 2026-10-15 173627" src="https://github.com/user-attachments/assets/2dbd9391-eb73-4aee-b13a-67fc5e712b65" />
-<img width="871" height="652" alt="Знімок екрана 2026-10-15 173613" src="https://github.com/user-attachments/assets/41bc8a6d-4ada-48bf-a8f5-5c07ecec4e82" />
 # 📧 Email Engagement & Account Activity Analysis | BigQuery + Looker Studio
 
 **[▶ Open the interactive dashboard](https://datastudio.google.com/s/uBgeeD-vZjc)**
@@ -70,3 +68,6 @@ An earlier version of the dashboard summed the country rank field in Looker Stud
 ## 🚀 Outcome
 
 Raw data → SQL transformation → reporting-ready dataset → dashboard → validated business insights.
+
+<img width="872" height="658" alt="Знімок екрана 2026-10-15 173627" src="https://github.com/user-attachments/assets/2dbd9391-eb73-4aee-b13a-67fc5e712b65" />
+<img width="871" height="652" alt="Знімок екрана 2026-10-15 173613" src="https://github.com/user-attachments/assets/41bc8a6d-4ada-48bf-a8f5-5c07ecec4e82" />
