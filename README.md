@@ -44,7 +44,6 @@ The output is filtered to the top 10 countries by accounts **or** by sent emails
 2. Combined both metric groups with `UNION ALL` and aggregated them to one grain.
 3. Added country-level totals and rankings with window functions.
 4. Built engagement metrics in Looker Studio as **ratios of sums**: `SUM(open_msg) / SUM(sent_msg)` and `SUM(visit_msg) / SUM(sent_msg)`.
-5. Validated every dashboard number against the raw query output in Python.
 
 ## 📈 Key Insights
 
