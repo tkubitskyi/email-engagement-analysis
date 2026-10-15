@@ -1,12 +1,12 @@
--- 1. Підрахунок кількості акаунтів за кожною унікальною комбінацією атрибутів
+-- 1. Account counts for each unique combination of attributes
 WITH account AS (
   SELECT
-    ss.date AS created_date,                     -- дата створення сесії
-    sp.country AS country,                       -- країна користувача
-    acc.send_interval,                           -- інтервал розсилки (daily/weekly/etc.)
-    acc.is_verified,                             -- чи підтверджено акаунт
-    acc.is_unsubscribed,                         -- чи відписаний від розсилки
-    COUNT(DISTINCT acc.id) AS account_cnt        -- кількість унікальних акаунтів
+    ss.date AS created_date,                     -- session (account creation) date
+    sp.country AS country,                       -- user country
+    acc.send_interval,                           -- email send interval (daily/weekly/etc.)
+    acc.is_verified,                             -- whether the account is verified
+    acc.is_unsubscribed,                         -- whether the user unsubscribed
+    COUNT(DISTINCT acc.id) AS account_cnt        -- number of unique accounts
   FROM data-analytics-mate.DA.account acc
   JOIN data-analytics-mate.DA.account_session acs
     ON acc.id = acs.account_id
@@ -18,17 +18,17 @@ WITH account AS (
 ),
 
 
--- 2. Метрики взаємодії з email: відправка, відкриття, переходи
+-- 2. Email engagement metrics: sent, opened, visited
 email_metrics AS (
   SELECT
-    DATE_ADD(ss.date, INTERVAL ems.sent_date DAY) AS sent_date, -- реальна дата відправки (на основі дати сесії + offset)
+    DATE_ADD(ss.date, INTERVAL ems.sent_date DAY) AS sent_date, -- actual send date (session date + day offset)
     sp.country AS country,
     acc.send_interval,
     acc.is_verified,
     acc.is_unsubscribed,
-    COUNT(DISTINCT ems.id_message) AS sent_msg,    -- скільки листів було відправлено
-    COUNT(DISTINCT emo.id_message) AS open_msg,    -- скільки було відкрито
-    COUNT(DISTINCT emv.id_message) AS visit_msg    -- скільки листів призвели до переходів
+    COUNT(DISTINCT ems.id_message) AS sent_msg,    -- emails sent
+    COUNT(DISTINCT emo.id_message) AS open_msg,    -- emails opened
+    COUNT(DISTINCT emv.id_message) AS visit_msg    -- emails that led to a site visit
   FROM data-analytics-mate.DA.email_sent ems
   LEFT JOIN data-analytics-mate.DA.email_open emo
     ON ems.id_message = emo.id_message
@@ -46,7 +46,7 @@ email_metrics AS (
 ),
 
 
--- 3. Об'єднання метрик акаунтів та email-метрик в один датасет (у вигляді UNION ALL)
+-- 3. Combine account and email metrics into one dataset (UNION ALL)
 unions AS (
   SELECT
     created_date AS date,
@@ -76,7 +76,7 @@ unions AS (
 ),
 
 
--- 4. Агрегація всіх метрик на рівень однієї дати + групувальних атрибутів
+-- 4. Aggregate all metrics to one grain: date + grouping attributes
 final_groups AS (
   SELECT
     date,
@@ -84,36 +84,36 @@ final_groups AS (
     send_interval,
     is_verified,
     is_unsubscribed,
-    SUM(account_cnt) AS account_cnt,     -- сумуємо по акаунтах
-    SUM(sent_msg) AS sent_msg,           -- по відправлених
-    SUM(open_msg) AS open_msg,           -- по відкритих
-    SUM(visit_msg) AS visit_msg          -- по переходах
+    SUM(account_cnt) AS account_cnt,     -- accounts
+    SUM(sent_msg) AS sent_msg,           -- sent
+    SUM(open_msg) AS open_msg,           -- opened
+    SUM(visit_msg) AS visit_msg          -- visited
   FROM unions
   GROUP BY date, country, send_interval, is_verified, is_unsubscribed
 ),
 
 
--- 5.1 Додаємо сумарні значення по країнах (віконні функції)
+-- 5.1 Country-level totals (window functions)
 country_sums AS (
   SELECT
     *,
-    SUM(account_cnt) OVER (PARTITION BY country) AS total_country_account_cnt,  -- загальна кількість акаунтів у країні
-    SUM(sent_msg) OVER (PARTITION BY country) AS total_country_sent_cnt         -- загальна кількість email-ів у країні
+    SUM(account_cnt) OVER (PARTITION BY country) AS total_country_account_cnt,  -- total accounts in the country
+    SUM(sent_msg) OVER (PARTITION BY country) AS total_country_sent_cnt         -- total emails sent in the country
   FROM final_groups
 ),
 
 
--- 5.2 Ранжуємо країни за загальними метриками (на рівні всієї країни)
+-- 5.2 Rank countries by their totals
 country_totals AS (
   SELECT
     *,
-    DENSE_RANK() OVER (ORDER BY total_country_account_cnt DESC) AS rank_total_country_account_cnt,  -- місце в рейтингу по акаунтах
-    DENSE_RANK() OVER (ORDER BY total_country_sent_cnt DESC) AS rank_total_country_sent_cnt          -- місце по email-кампаніях
+    DENSE_RANK() OVER (ORDER BY total_country_account_cnt DESC) AS rank_total_country_account_cnt,  -- country rank by accounts
+    DENSE_RANK() OVER (ORDER BY total_country_sent_cnt DESC) AS rank_total_country_sent_cnt          -- country rank by sent emails
   FROM country_sums
 )
 
 
--- 6. Фінальний запит: обираємо ТОР-10 країн за кількістю акаунтів або email-ів
+-- 6. Final output: top-10 countries by accounts or by sent emails
 SELECT
   date,
   country,
@@ -129,6 +129,6 @@ SELECT
   rank_total_country_account_cnt,
   rank_total_country_sent_cnt
 FROM country_totals
-WHERE rank_total_country_account_cnt <= 10     -- Топ-10 по акаунтах
-   OR rank_total_country_sent_cnt <= 10        -- або по email-ів
-ORDER BY date, country                          -- впорядкування по даті і країнах
+WHERE rank_total_country_account_cnt <= 10     -- top 10 by accounts
+   OR rank_total_country_sent_cnt <= 10        -- or top 10 by sent emails
+ORDER BY date, country                          -- sort by date and country
