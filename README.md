@@ -1,107 +1,70 @@
 # 📧 Email Engagement & Account Activity Analysis | BigQuery + Looker Studio
 
+**[▶ Open the interactive dashboard](https://datastudio.google.com/s/uBgeeD-vZjc)**
+
 ## 🔍 Project Overview
-This project analyzes account creation and email engagement activity using an e-commerce dataset in **BigQuery**.
 
-The goal was to build a single analytical dataset that helps compare user behavior across countries and account attributes, including:
+This project analyzes account creation and email engagement for an e-commerce product using data in Google BigQuery.
 
-- country
-- send interval
-- account verification status
-- unsubscribe status
+I built a single reporting-ready dataset that combines account metrics and email activity metrics, then visualized it in Looker Studio to compare countries by volume, engagement and activity over time.
 
-The project combines **account metrics** and **email activity metrics** into one reporting-ready dataset and visualizes the results in **Looker Studio**.
+## 🎯 Business Questions
 
----
+- Which countries bring the most accounts and receive the most emails?
+- Does email volume simply follow the size of the user base, or do some markets receive disproportionately more?
+- How engaged are users in different countries (open rate, click rate)?
+- How did email activity change over time?
 
-## 🎯 Business Goal
-The analysis was designed to support decision-making around:
+## 🛠 Tools & Techniques
 
-- account growth by country
-- email engagement performance
-- user segmentation
-- identification of high-value markets
-- time-based trends in messaging activity
-
----
-
-## 🛠 Tools & Technologies
-- **SQL**
-- **Google BigQuery**
-- **Looker Studio**
-- **Window Functions**
-- **CTEs**
-- **UNION ALL**
-- **Analytical Reporting**
-
----
+- **SQL / Google BigQuery:** CTEs, `UNION ALL`, window functions (`SUM() OVER`, `DENSE_RANK()`)
+- **Looker Studio:** calculated fields, bar charts, time series, multi-page report
+- **Analysis:** segmentation by country and account attributes, ratio metrics, data validation
 
 ## 📊 Dataset Structure
-The final dataset was built using data from an e-commerce database and includes the following dimensions:
 
-- `date`
-- `country`
-- `send_interval`
-- `is_verified`
-- `is_unsubscribed`
+The final dataset is aggregated by `date`, `country`, `send_interval`, `is_verified` and `is_unsubscribed`.
 
-And the following key metrics:
+| Metric | Description |
+|---|---|
+| `account_cnt` | Number of created accounts |
+| `sent_msg` | Emails sent |
+| `open_msg` | Emails opened |
+| `visit_msg` | Emails that led to a site visit |
+| `total_country_account_cnt` | Total accounts per country (window function) |
+| `total_country_sent_cnt` | Total emails sent per country (window function) |
+| `rank_total_country_account_cnt` | Country rank by accounts |
+| `rank_total_country_sent_cnt` | Country rank by sent emails |
 
-- `account_cnt`
-- `sent_msg`
-- `open_msg`
-- `visit_msg`
-- `total_country_account_cnt`
-- `total_country_sent_cnt`
-- `rank_total_country_account_cnt`
-- `rank_total_country_sent_cnt`
-
----
+The output is filtered to the top 10 countries by accounts **or** by sent emails (11 countries due to rank ties).
 
 ## ⚙️ What I Did
-- Wrote a SQL query in **BigQuery** using multiple **CTEs**
-- Calculated account creation metrics and email engagement metrics separately
-- Combined both metric groups using **UNION ALL**
-- Aggregated results by country, date, and account attributes
-- Applied **window functions** to calculate country-level totals and rankings
-- Filtered the final output to show only the top countries by account count or sent emails
-- Built a **Looker Studio dashboard** to visualize country-level metrics and email activity over time
 
----
+1. Calculated account metrics and email metrics in separate CTEs, because they live on different date logic (account creation date vs. email send date).
+2. Combined both metric groups with `UNION ALL` and aggregated them to one grain.
+3. Added country-level totals and rankings with window functions.
+4. Built engagement metrics in Looker Studio as **ratios of sums**: `SUM(open_msg) / SUM(sent_msg)` and `SUM(visit_msg) / SUM(sent_msg)`.
+5. Validated every dashboard number against the raw query output in Python.
 
 ## 📈 Key Insights
-- The **United States** had the largest number of created accounts (**12,384**), significantly ahead of other countries.
-- **India** ranked second by account count, followed by **Canada**.
-- In contrast, **Italy**, **Singapore**, and **Taiwan** ranked highest by total sent messages.
-- This suggests that countries with the largest account base do not necessarily generate the highest email activity.
-- Sent email activity increased from **November 2020**, peaked around **late December 2020**, and then gradually declined into **February 2021**.
 
----
-
-## 🧠 What This Project Demonstrates
-This project demonstrates my ability to:
-
-- write analytical SQL in BigQuery
-- structure logic using CTEs
-- combine datasets with different metric logic
-- use window functions for ranking and country-level aggregation
-- build reporting-ready datasets
-- translate raw query results into business insights
-- create dashboard visualizations for stakeholder-friendly analysis
-
----
+- **The United States dominates** both account creation (12,384 accounts) and email volume (233,503 sent messages).
+- **Email volume scales with the user base.** Country rankings by sent emails closely mirror rankings by accounts, at roughly 17–21 messages per account.
+- **Engagement differs more than volume.** Overall open rate is 35.5% and click rate 3.9%. China has the highest open rate (41.2%), while Spain and Singapore have the lowest (~29.5%).
+- **Singapore stands out:** the highest email volume per account (23.7) combined with the lowest click rate (2.6%). This may point to email fatigue. It is a hypothesis worth testing (for example, an A/B test on send frequency), not a proven cause.
+- **Activity over time:** weekly email volume rises through November 2020, plateaus from mid-December to late January, then drops. The ramp-up and drop likely reflect the boundaries of the data window rather than changes in user behavior.
 
 ## 📷 Dashboard
-The dashboard was built in **Looker Studio** and includes:
-- account count by country
-- country ranking by account count
-- country ranking by sent messages
-- timeline of sent email activity
 
----
+<!-- Add updated screenshots of both pages here -->
+
+- **Page 1 – Volume by Country:** accounts and sent emails by country, metrics table
+- **Page 2 – Engagement & Timeline:** open rate and click rate by country, daily email activity
+
+## 🔁 Revision Note
+
+An earlier version of the dashboard summed the country rank field in Looker Studio. Because the rank repeats on every row, the charts showed *rank × number of rows* and inverted the country comparison, which led to an incorrect insight. I found the issue while re-validating the dashboard against the query output, fixed the aggregation, replaced rank charts with direct metrics and added engagement rates.
 
 ## 🚀 Outcome
-This project reflects a practical analytics workflow:
-**raw data → SQL transformation → ranked reporting dataset → dashboard visualization → business insight generation**
 
-It was built as part of my transition into data analytics and reflects my ability to work with structured raw data and reporting logic in a business context.
+Raw data → SQL transformation → reporting-ready dataset → dashboard → validated business insights.
